@@ -18,6 +18,13 @@ x-spark-common: &spark-common
 
 services:
 
+  data-producer:
+    container_name: data-producer
+    build:
+      context: ./Finnhub
+      dockerfile: Dockerfile
+
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     hostname: zookeeper
@@ -67,18 +74,18 @@ services:
     networks:
       - pipeline
 
-  kafdrop:
-    image: obsidiandynamics/kafdrop:4.0.0
-    container_name: kafdrop
-    depends_on:
-      - kafka-broker
-      - zookeeper
-    ports:
-      - "19000:9000"
-    environment:
-      KAFKA_BROKERCONNECT: kafka:29092
-    networks:
-      - pipeline
+#  kafdrop:
+#    image: obsidiandynamics/kafdrop:4.0.0
+#    container_name: kafdrop
+#    depends_on:
+#      - kafka-broker
+#      - zookeeper
+#    ports:
+#      - "19000:9000"
+#    environment:
+#      KAFKA_BROKERCONNECT: kafka:29092
+#    networks:
+#      - pipeline
 
 
   spark-master:
