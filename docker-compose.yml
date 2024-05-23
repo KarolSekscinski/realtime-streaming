@@ -176,8 +176,7 @@ services:
     ports:
       - "8050:8050"
     depends_on:
-      cassandra-db:
-        condition: service_healthy
+      - cassandra-db
 
 networks:
   pipeline:

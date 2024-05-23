@@ -1,0 +1,55 @@
+{
+  "namespace" : "Producer",
+  "type" : "record",
+  "name" : "message",
+  "fields": [ {
+    "name" : "data",
+    "type" : {
+      "type" : "array",
+      "items" : {
+        "type" : "record",
+        "name" : "data",
+        "fields" : [ {
+          "name" : "c",
+          "type" : [
+            {
+              "type" : "array",
+              "items" : ["null", "string"],
+              "default" : []
+            },
+            "null"
+          ],
+          "doc": "List of trade conditions."
+        },
+        {
+          "name" : "p",
+          "type" : "double",
+          "doc" : "Last price at which stock was traded."
+        },
+        {
+          "name" : "s",
+          "type" : "string",
+          "doc": "Symbol of a stock."
+        },
+        {
+          "name" : "t",
+          "type" : "long",
+          "doc" : "UNIX milliseconds timestamp at which the stock was traded."
+        },
+        {
+          "name" : "v",
+          "type" : "double",
+          "doc" : "Volume at which the stock was traded."
+        } ]
+      },
+      "doc" : "Trade messages"
+    },
+    "doc" : "Contains data inside message."
+  },
+  {
+    "name" : "type",
+    "type": "string",
+    "doc": "Message type."
+  } ],
+  "doc": "A avro schema for upcoming Finnhub.io messages about trades."
+}
