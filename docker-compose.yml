@@ -1,19 +1,5 @@
-name: realtime-p
+name: realtime-processing
 
-x-spark-common: &spark-common
-  build:
-    context: ./Processor/spark
-    dockerfile: Dockerfile.spark
-  command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
-  depends_on:
-    - spark-master
-  environment:
-    SPARK_MODE: worker
-    SPARK_WORKER_CORES: 2
-    SPARK_WORKER_MEMORY: 1g
-    SPARK_MASTER_URL: spark://spark-master:7077
-  networks:
-    - pipeline
 
 
 services:
@@ -107,34 +93,77 @@ services:
       - "9000:9000"
     environment:
       KAFKA_BROKERCONNECT: kafka-broker:29092
-#      JVM_OPTS: "-Xms16M -Xmx512M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+    networks:
+      - pipeline
+
+  main-processor:
+    container_name: main-processor
+    hostname: main-processor
+    build:
+      context: ProcessorSpark
+      dockerfile: Dockerfile
+      no_cache: true
+    ports:
+      - "8002:8002"
+      - "4040:4040"
+    environment:
+      SPARK_PUBLIC_DNS: localhost
+    depends_on:
+      - spark-master
+      - spark-worker-1
+      - spark-worker-2
+      - cassandra-db
+      - cassandra-db-init
+    networks:
+      - pipeline
+
+  spark-master:
+    container_name: spark-master
+    hostname: spark-master
+    build:
+      context: ProcessorSpark/spark
+      dockerfile: Dockerfile.spark-master
+    environment:
+      INIT_DAEMON_SETUP: setup_spark
+      SPARK_PUBLIC_DNS: localhost
+    ports:
+      - "9090:8080"
+      - "7077:7077"
     networks:
       - pipeline
 
 
-#  spark-master:
-#    container_name: spark-master
-#    hostname: spark-master
-#    build:
-#      context: ./Processor/spark
-#      dockerfile: Dockerfile.spark
-#    command: bin/spark-class org.apache.spark.deploy.master.Master
-#    ports:
-#      - "9090:8080"
-#      - "7077:7077"
-#    networks:
-#      - pipeline
-#
-#
-#  spark-worker-1:
-#    container_name: spark-worker-1
-#    hostname: spark-worker-1
-#    <<: *spark-common
-#
-#  spark-worker-2:
-#    container_name: spark-worker-2
-#    hostname: spark-worker-2
-#    <<: *spark-common
+  spark-worker-1:
+    container_name: spark-worker-1
+    hostname: spark-worker-1
+    build:
+      context: ProcessorSpark/spark
+      dockerfile: Dockerfile.spark-worker
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+      - SPARK_PUBLIC_DNS=localhost
+    networks:
+      - pipeline
+
+  spark-worker-2:
+    container_name: spark-worker-2
+    hostname: spark-worker-2
+    build:
+      context: ProcessorSpark/spark
+      dockerfile: Dockerfile.spark-worker
+    depends_on:
+      - spark-master
+    ports:
+      - "8082:8081"
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+      - SPARK_PUBLIC_DNS=localhost
+    networks:
+      - pipeline
 
   cassandra-db-init:
     image: cassandra:4.1.5
@@ -155,28 +184,35 @@ services:
     hostname: cassandra
     ports:
       - "9042:9042"
-    environment:
-      - MAX_HEAP_SIZE=256M
-      - HEAP_NEWSIZE=128M
-      - CASSANDRA_USERNAME=cassandra
-      - CASSANDRA_PASSWORD=cassandra
+    environment: &environment
+      MAX_HEAP_SIZE: 256M
+      HEAP_NEWSIZE: 128M
+      CASSANDRA_USERNAME: cassandra
+      CASSANDRA_PASSWORD: cassandra
+      CASSANDRA_CLUSTER_NAME: CassandraCluster
+      CASSANDRA_NUM_TOKENS: 128
+      CASSANDRA_DATACENTER: DataCenter1
+      CASSANDRA_RACK: Rack1
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
     healthcheck:
-      test: ["CMD", "cqlsh -u cassandra -p cassandra -e 'DESCRIBE KEYSPACES;'"]
+      test: ["CMD", "cqlsh",  "-u cassandra", "-p cassandra", "-e DESCRIBE KEYSPACES;"]
       interval: 15s
       timeout: 10s
       retries: 8
     networks:
       - pipeline
 
-  plotly:
-    container_name: plotly
-    build:
-      context: ./plotly
-      dockerfile: Dockerfile
-    ports:
-      - "8050:8050"
-    depends_on:
-      - cassandra-db
+#  plotly:
+#    container_name: plotly
+#    build:
+#      context: ./plotly
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8050:8050"
+#    depends_on:
+#      - cassandra-db
+#    networks:
+#      - pipeline
 
 networks:
   pipeline:

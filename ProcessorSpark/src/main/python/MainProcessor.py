@@ -3,7 +3,7 @@ from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from pyspark.sql.avro.functions import from_avro
 from pyspark.sql.functions import current_timestamp
-import Settings
+from Settings import Settings
 
 import uuid
 from pyspark.sql.functions import udf
@@ -14,11 +14,11 @@ class MainProcessor:
     def main():
         # This line creates spark session
         spark = SparkSession.builder \
-            .appName("Main Streaming Processor") \
+            .appName("Main Streaming ProcessorSpark") \
             .getOrCreate()
 
         # This line reads configuration class
-        settings_for_spark = Settings(spark)
+        settings_for_spark = Settings()
 
         # This line load trades schema
         trades_schema = spark.read.text(settings_for_spark.schemas['trades']).first().value
@@ -31,16 +31,17 @@ class MainProcessor:
             .readStream \
             .format("kafka") \
             .option("kafka.bootstrap.servers", settings_for_spark.kafka['server_address']) \
-            .option("subscribe", settings_for_spark.kafka['topic']) \
-            .option("minPartitions", settings_for_spark.kafka['min_partitions']) \
-            .option("maxOffsetsPerTrigger", settings_for_spark.spark['max_offsets_per_trigger']) \
-            .option("useDeprecatedOffsetFetching", settings_for_spark.spark['deprecated_offsets']) \
+            .option("subscribe", settings_for_spark.kafka['topic'][0]['market']) \
+            .option("minPartitions", settings_for_spark.kafka['min_partitions'][0]['MainProcessor']) \
+            .option("maxOffsetsPerTrigger", settings_for_spark.spark['max_offsets_per_trigger'][0]['MainProcessor']) \
+            .option("useDeprecatedOffsetFetching", settings_for_spark.spark['deprecated_offsets'][0]['MainProcessor']) \
             .load()
 
         # Explode the data from JSON?
         expanded_df = input_df \
             .withColumn("avroData", from_avro(col("value"), trades_schema)) \
-            .selectExpr("avroData", "explode(data) as col", "type")
+            .selectExpr("avroData.*")
+        # .selectExpr("avroData", "explode(data) as col", "type")
 
         # Rename columns to match their names in Cassandra db
         final_df = expanded_df \
@@ -58,8 +59,10 @@ class MainProcessor:
             .writeStream \
             .trigger(processingTime='5 seconds') \
             .foreachBatch(lambda batch_df, batch_id:
-                          batch_df.write.cassandraFormat(settings_for_spark.cassandra['trades'],
-                                                         settings_for_spark.cassandra['keyspace'])
+                          batch_df.write
+                          .format("org.apache.spark.sql.cassandra")
+                          .options(table=settings_for_spark.cassandra['tables'][0]['trades'],
+                                   keyspace=settings_for_spark.cassandra['keyspace'])
                           .mode("append")
                           .save()
                           ) \
@@ -84,8 +87,10 @@ class MainProcessor:
             .writeStream \
             .trigger(processingTime="5 seconds") \
             .foreachBatch(lambda batch_df, batch_id:
-                          batch_df.write.cassandraFormat(settings_for_spark.cassandra['aggregates'],
-                                                         settings_for_spark.cassandra['keyspace'])
+                          batch_df.write
+                          .format("org.apache.spark.sql.cassandra")
+                          .options(table=settings_for_spark.cassandra['tables'][0]['aggregates'],
+                                   keyspace=settings_for_spark.cassandra['keyspace'])
                           .mode("append")
                           .save()
                           ) \
@@ -97,4 +102,4 @@ class MainProcessor:
 
 
 if __name__ == "__main__":
-    MainProcessor()
+    MainProcessor().main()
