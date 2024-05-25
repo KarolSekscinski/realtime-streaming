@@ -1,5 +1,4 @@
-name: realtime-processing
-
+version: '3.8'
 
 
 services:
@@ -100,9 +99,7 @@ services:
     container_name: main-processor
     hostname: main-processor
     build:
-      context: ProcessorSpark
-      dockerfile: Dockerfile
-      no_cache: true
+      context: git://
     ports:
       - "8002:8002"
       - "4040:4040"
@@ -116,6 +113,7 @@ services:
       - cassandra-db-init
     networks:
       - pipeline
+
 
   spark-master:
     container_name: spark-master
