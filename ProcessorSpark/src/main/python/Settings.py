@@ -1,56 +1,62 @@
+import configparser
+
+
 class Settings:
-    def __init__(self):
+    def __init__(self, config_file='/app/resources/application.conf'):
+        self.config = configparser.ConfigParser()
+        self.config.read(config_file)
+
         self.cassandra = {
-            "host": "cassandra",
-            "keyspace": "market",
-            "username": "cassandra",
-            "password": "cassandra",
+            "host": self.config.get('cassandra', 'host'),
+            "keyspace": self.config.get('cassandra', 'keyspace'),
+            "username": self.config.get('cassandra', 'username'),
+            "password": self.config.get('cassandra', 'password'),
             "tables": [
                 {
-                    "trades": "trades",
-                    "aggregates": "run_10_s_avg"
+                    "trades": self.config.get('cassandra.tables', 'trades'),
+                    "aggregates": self.config.get('cassandra.tables', 'aggregates')
                 }
             ]
         }
 
         self.kafka = {
-            "server_address": "kafka-broker:29092",
+            "server_address": self.config.get('kafka', 'server_address'),
             "topic": [
                 {
-                    "market": "market"
+                    "market": self.config.get('kafka.topics', 'market')
                 }
             ],
             "min_partitions": [
                 {
-                    "MainProcessor": "1"
+                    "StreamProcessor": self.config.get('kafka.min_partitions', 'StreamProcessor')
                 }
             ]
         }
 
         self.spark = {
-            "master": "spark://spark-master:7077",
+            "master": self.config.get('spark', 'master'),
             "appName": [
                 {
-                    "MainProcessor": "Main ProcessorSpark"
+                    "StreamProcessor": self.config.get('spark.appName', 'StreamProcessor')
                 }
             ],
             "max_offsets_per_trigger": [
                 {
-                    "MainProcessor": "1000"
+                    "StreamProcessor": self.config.get('spark.max_offsets_per_trigger', 'StreamProcessor')
                 }
             ],
             "shuffle_partitions": [
                 {
-                    "MainProcessor": "2"
+                    "StreamProcessor": self.config.get('spark.shuffle_partitions', 'StreamProcessor')
                 }
             ],
             "deprecated_offsets": [
                 {
-                    "MainProcessor": "false"
+                    "StreamProcessor": self.config.get('spark.deprecated_offsets', 'StreamProcessor')
                 }
             ]
         }
-# This could be incorrect
+
         self.schemas = {
-            "trades": "./resources/schemas/trades.avsc"
+            "trades": self.config.get('schemas', 'trades')
         }

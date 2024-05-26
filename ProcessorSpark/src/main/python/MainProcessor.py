@@ -1,3 +1,5 @@
+import time
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
@@ -12,13 +14,13 @@ from pyspark.sql.functions import udf
 class MainProcessor:
     @staticmethod
     def main():
-        # This line creates spark session
-        spark = SparkSession.builder \
-            .appName("Main Streaming ProcessorSpark") \
-            .getOrCreate()
-
         # This line reads configuration class
         settings_for_spark = Settings()
+
+        # This line creates spark session
+        spark = SparkSession.builder \
+            .appName(settings_for_spark.spark['appName'][0]['StreamProcessor']) \
+            .getOrCreate()
 
         # This line load trades schema
         trades_schema = spark.read.text(settings_for_spark.schemas['trades']).first().value

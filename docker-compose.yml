@@ -99,7 +99,8 @@ services:
     container_name: main-processor
     hostname: main-processor
     build:
-      context: git://
+      context: ProcessorSpark
+      dockerfile: Dockerfile
     ports:
       - "8002:8002"
       - "4040:4040"
@@ -111,6 +112,8 @@ services:
       - spark-worker-2
       - cassandra-db
       - cassandra-db-init
+#    volumes:
+#      - ./ProcessorSpark/src/main/resources/schemas:/app/resources/schemas
     networks:
       - pipeline
 
