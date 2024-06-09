@@ -23,7 +23,7 @@ def connect_to_cassandra(settings_dict: dict):
     for i in range(5):
         try:
             logger.info(f"Connecting to Cassandra at {settings_dict['host']}:{settings_dict['port']} using keyspace '{settings_dict['keyspace']}'")
-            cluster = Cluster([settings_dict['host']], port=settings_dict['port'], protocol_version=5
+            cluster = Cluster([settings_dict['host']], port=settings_dict['port'], protocol_version=5,
                               load_balancing_policy=DCAwareRoundRobinPolicy(local_dc="DataCenter1"))
             session = cluster.connect(settings_dict["keyspace"])
             logger.info("Successfully connected to Cassandra")
