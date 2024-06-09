@@ -21,7 +21,7 @@ CREATE INDEX IF NOT EXISTS ON trades (uuid);
 CREATE TABLE run_10_s_avg(
     uuid uuid,
     symbol text,
-    price_x_volume double,
+    avg_price_x_volume double,
     ingestion_ts timestamp,
     PRIMARY KEY ( (uuid), ingestion_ts )
 );

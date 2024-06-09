@@ -2,12 +2,13 @@ import configparser
 
 
 class Settings:
-    def __init__(self, config_file='/app/resources/application.conf'):
+    def __init__(self, config_file='/app/src/main/resources/application.conf'):
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
 
         self.cassandra = {
             "host": self.config.get('cassandra', 'host'),
+            "port": self.config.get('cassandra', 'port'),
             "keyspace": self.config.get('cassandra', 'keyspace'),
             "username": self.config.get('cassandra', 'username'),
             "password": self.config.get('cassandra', 'password'),
