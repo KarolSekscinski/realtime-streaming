@@ -203,17 +203,20 @@ services:
     networks:
       - pipeline
 
-#  plotly:
-#    container_name: plotly
-#    build:
-#      context: ./plotly
-#      dockerfile: Dockerfile
-#    ports:
-#      - "8050:8050"
-#    depends_on:
-#      - cassandra-db
-#    networks:
-#      - pipeline
+  plotly:
+    container_name: plotly
+    build:
+      context: ./plotly
+      dockerfile: Dockerfile
+    ports:
+      - "8050:8050"
+    depends_on:
+      cassandra-db:
+        condition: service_healthy
+      main-processor:
+        condition: service_started
+    networks:
+      - pipeline
 
 networks:
   pipeline:
