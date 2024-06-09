@@ -23,10 +23,16 @@ def connect_to_cassandra(settings_dict: dict):
     for i in range(5):
         try:
             logger.info(f"Connecting to Cassandra at {settings_dict['host']}:{settings_dict['port']} using keyspace '{settings_dict['keyspace']}'")
-            cluster = Cluster([settings_dict['host']], port=settings_dict['port'], protocol_version=5,
+            cluster = Cluster([settings_dict['host']], port=settings_dict['port'], protocol_version=5, auth_provider=auth_provider,
                               load_balancing_policy=DCAwareRoundRobinPolicy(local_dc="DataCenter1"))
-            session = cluster.connect(settings_dict["keyspace"])
-            logger.info("Successfully connected to Cassandra")
+            session = cluster.connect(settings_dict['keyspace'])
+            # Verify the connection
+            try:
+                session.execute("SELECT now() FROM system.local")
+                print("Connected to Cassandra")
+            except Exception as e:
+                print(f"Failed to connect to Cassandra: {e}")
+
             return session
         except ConnectionException as e:
             logger.error(f"Connection attempt {i+1} failed: {e}")
@@ -57,7 +63,6 @@ navbar = dbc.NavbarSimple(
     sticky="top"
 )
 
-# TODO add slider to change time interval
 main_content = dbc.Container(
     [
         dcc.Store(id='symbol_name', storage_type='session'),
@@ -68,9 +73,11 @@ main_content = dbc.Container(
             [
                 html.Button('ON/OFF Plotting', id='stop-button', n_clicks=0, className='btn btn-danger mt-3'),
                 html.H3("Live data from Finnhub.io", className="text-center"),
+                dcc.Slider(id="live-data-slider", min=1, max=10, step=1, value=1, marks={i: f'{i}s' for i in range(1,11)}, className="mt-3 mb-3"),
                 dcc.Graph(id="live-data"),
                 html.Hr(),
                 html.H3("Aggregated data price x volume average of live data", className="text-center"),
+                dcc.Slider(id="aggregated-slider", min=10, max=60, step=10, value=10,marks={i: f'{i}s' for i in range(10, 61, 10)}, className="mt-3 mb-3"),
                 dcc.Graph(id="aggregated")
             ], className="border shadow pt-5"
         )
@@ -105,6 +112,23 @@ def toggle_plotting(n_clicks, plotting_state):
     if n_clicks % 2 == 1:  # Stop plotting on odd clicks
         return False
     return True
+
+
+@app.callback(
+    Output("normal_interval", "interval"),
+    Input("live-data-slider", "value")
+)
+def update_normal_interval(value):
+    """Updates the normal interval based on slider value"""
+    return value * 1000
+
+@app.callback(
+    Output("agg_interval", "interval"),
+    Input("aggregated-slider", "value")
+)
+def update_agg_interval(value):
+    """Updates the aggregated interval based on slider value"""
+    return value * 1000
 
 @app.callback(
     Output("live-data", "figure"),
@@ -180,7 +204,7 @@ def generate_graph(symbol_name: str, data: pd.DataFrame, type_of_graph: bool):
 def query_cassandra_based_on_symbol(session, table, symbol, wait_time: int) -> pd.DataFrame:
     """This function queries the Cassandra for single trade values"""
     one_minute_ago = (datetime.now() - timedelta(minutes=wait_time)).strftime('%Y-%m-%d %H:%M:%S')
-    query = f"SELECT * FROM {table} WHERE symbol = '{symbol}' AND trade_ts >= '{one_minute_ago}'"
+    query = f"SELECT * FROM market.{table} WHERE symbol = '{symbol}' AND trade_ts >= '{one_minute_ago}'"
     rows = session.execute(query)
     if table == "trades":
         columns = ['symbol', 'trade_ts', 'ingestion_ts', 'price', 'trade_conditions', 'type', 'uuid', 'volume']
