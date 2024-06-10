@@ -1,12 +1,9 @@
 import time
 import logging
-from cassandra.auth import PlainTextAuthProvider
-from cassandra.policies import DCAwareRoundRobinPolicy
 from dash import Dash, html, dcc, Input, Output, State
-from cassandra.cluster import Cluster, ConnectionException
 import pandas as pd
-from datetime import datetime, timedelta
 from Settings import Settings
+from cassandra_gateway import CassandraGateway
 import dash_bootstrap_components as dbc
 
 logging.basicConfig(level=logging.INFO)
@@ -16,29 +13,23 @@ config = Settings()
 available_symbols = config.tickers['list'][0]
 
 
-def connect_to_cassandra(settings_dict: dict):
-    """Connect to the Cassandra based on settings dictionary"""
-    auth_provider = PlainTextAuthProvider(settings_dict['username'], settings_dict['password'])
-    cluster, session = None, None
+def fetch_data_from_cassandra(table_name, symbol_name, wait_time):
+    """Connect to the Cassandra and fetch data"""
+    test_result, session = None, None
+    gateway = CassandraGateway()
     for i in range(5):
         try:
-            logger.info(f"Connecting to Cassandra at {settings_dict['host']}:{settings_dict['port']} using keyspace '{settings_dict['keyspace']}'")
-            cluster = Cluster([settings_dict['host']], port=settings_dict['port'], protocol_version=5, auth_provider=auth_provider,
-                              load_balancing_policy=DCAwareRoundRobinPolicy(local_dc="DataCenter1"))
-            session = cluster.connect(settings_dict['keyspace'])
-            # Verify the connection
-            try:
-                session.execute("SELECT now() FROM system.local")
-                print("Connected to Cassandra")
-            except Exception as e:
-                print(f"Failed to connect to Cassandra: {e}")
-
-            return session
-        except ConnectionException as e:
-            logger.error(f"Connection attempt {i+1} failed: {e}")
+            session = gateway.db_session()
+            test_result = gateway.test_connection()
+        except Exception as e:
+            logger.error(f"{i+1}: Cannot connect to cassandra {e}")
             time.sleep(5)
-    logger.error("All connection attempts to Cassandra failed.")
-    return None
+    results = pd.DataFrame()
+    if test_result is None and session is not None:
+        logger.error("All connection attempts to Cassandra failed.")
+    else:
+        results = gateway.query(session, table_name, symbol_name, wait_time)
+    return results
 
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -73,11 +64,13 @@ main_content = dbc.Container(
             [
                 html.Button('ON/OFF Plotting', id='stop-button', n_clicks=0, className='btn btn-danger mt-3'),
                 html.H3("Live data from Finnhub.io", className="text-center"),
-                dcc.Slider(id="live-data-slider", min=1, max=10, step=1, value=1, marks={i: f'{i}s' for i in range(1,11)}, className="mt-3 mb-3"),
+                dcc.Slider(id="live-data-slider", min=1, max=10, step=1, value=1,
+                           marks={i: f'{i}s' for i in range(1, 11)}, className="mt-3 mb-3"),
                 dcc.Graph(id="live-data"),
                 html.Hr(),
                 html.H3("Aggregated data price x volume average of live data", className="text-center"),
-                dcc.Slider(id="aggregated-slider", min=10, max=60, step=10, value=10,marks={i: f'{i}s' for i in range(10, 61, 10)}, className="mt-3 mb-3"),
+                dcc.Slider(id="aggregated-slider", min=10, max=60, step=10, value=10,
+                           marks={i: f'{i}s' for i in range(10, 61, 10)}, className="mt-3 mb-3"),
                 dcc.Graph(id="aggregated")
             ], className="border shadow pt-5"
         )
@@ -102,6 +95,7 @@ def change_symbol(value):
         #     return {value: full_name}
     return {value: "BINANCE:BTCUSDT"}
 
+
 @app.callback(
     Output('plotting_state', 'data'),
     Input('stop-button', 'n_clicks'),
@@ -122,6 +116,7 @@ def update_normal_interval(value):
     """Updates the normal interval based on slider value"""
     return value * 1000
 
+
 @app.callback(
     Output("agg_interval", "interval"),
     Input("aggregated-slider", "value")
@@ -130,9 +125,10 @@ def update_agg_interval(value):
     """Updates the aggregated interval based on slider value"""
     return value * 1000
 
+
 @app.callback(
     Output("live-data", "figure"),
-    Input("ticker-dropdown", "data"),
+    Input("ticker-dropdown", "value"),
     Input("normal_interval", "n_intervals"),
     State("plotting_state", "data")
 )
@@ -147,7 +143,7 @@ def update_normal_graph(symbol_data, n, plotting_state):
 
 @app.callback(
     Output("aggregated", "figure"),
-    Input("ticker-dropdown", "data"),
+    Input("ticker-dropdown", "value"),
     Input("agg_interval", "n_intervals"),
     State("plotting_state", "data")
 )
@@ -161,7 +157,7 @@ def update_aggregated_graph(symbol_data, n, plotting_state):
 
 
 def generate_graph(symbol_name: str, data: pd.DataFrame, type_of_graph: bool):
-    if type_of_graph: # So we are generating aggregated graph
+    if type_of_graph:  # So we are generating aggregated graph
         # columns of data = ['uuid', 'ingestion_ts', 'avg_price_x_volume', 'symbol']
         trace = {
             "x": data["ingestion_ts"],
@@ -172,7 +168,8 @@ def generate_graph(symbol_name: str, data: pd.DataFrame, type_of_graph: bool):
         }
 
     else:
-        # columns of data = ['symbol', 'trade_ts', 'ingestion_ts', 'price', 'trade_conditions', 'type', 'uuid', 'volume']
+        # columns of data =
+        # ['symbol', 'trade_ts', 'ingestion_ts', 'price', 'trade_conditions', 'type', 'uuid', 'volume']
         price_trace = {
             "x": data['trade_ts'],
             "y": data['price'],
@@ -201,27 +198,5 @@ def generate_graph(symbol_name: str, data: pd.DataFrame, type_of_graph: bool):
     return {"data": [trace], "layout": layout}
 
 
-def query_cassandra_based_on_symbol(session, table, symbol, wait_time: int) -> pd.DataFrame:
-    """This function queries the Cassandra for single trade values"""
-    one_minute_ago = (datetime.now() - timedelta(minutes=wait_time)).strftime('%Y-%m-%d %H:%M:%S')
-    query = f"SELECT * FROM market.{table} WHERE symbol = '{symbol}' AND trade_ts >= '{one_minute_ago}'"
-    rows = session.execute(query)
-    if table == "trades":
-        columns = ['symbol', 'trade_ts', 'ingestion_ts', 'price', 'trade_conditions', 'type', 'uuid', 'volume']
-    else:
-        columns = ['uuid', 'ingestion_ts', 'avg_price_x_volume', 'symbol']
-    df = pd.DataFrame(rows, columns=columns)
-    session.shutdown()
-    return df
-
-
-def fetch_data_from_cassandra(table: str, symbol: str, wait_time: int) -> pd.DataFrame:
-    return query_cassandra_based_on_symbol(cassandra_session, table, symbol, wait_time)
-
-
 if __name__ == '__main__':
-    cassandra_session = connect_to_cassandra(config.cassandra)
-    if cassandra_session is None:
-        logger.error("Failed to establish Cassandra session. Exiting application.")
-        exit(1)
     app.run(debug=True, host="0.0.0.0")
