@@ -203,18 +203,37 @@ services:
     networks:
       - pipeline
 
-  plotly:
-    container_name: plotly
+#  plotly:
+#    container_name: plotly
+#    build:
+#      context: ./plotly
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8050:8050"
+#    depends_on:
+#      cassandra-db:
+#        condition: service_healthy
+#      main-processor:
+#        condition: service_started
+#    networks:
+#      - pipeline
+  grafana:
     build:
-      context: ./plotly
+      context: ./grafana
       dockerfile: Dockerfile
+    container_name: grafana
     ports:
-      - "8050:8050"
+      - "3000:3000"
+    restart: unless-stopped
     depends_on:
-      cassandra-db:
-        condition: service_healthy
-      main-processor:
-        condition: service_started
+      - cassandra-db
+      - main-processor
+    environment:
+      - GF_INSTALL_PLUGINS=hadesarchitect-cassandra-datasource
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/dashboard.json
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+#      - GF_SECURITY_ADMIN_USER=admin
+#      - GF_SECURITY_ADMIN_PASSWORD=admin
     networks:
       - pipeline
 
