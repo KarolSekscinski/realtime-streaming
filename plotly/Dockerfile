@@ -1,15 +1,15 @@
 FROM python:3.11-alpine
 
-RUN mkdir /webapp
+RUN mkdir /app
 
-WORKDIR /webapp
+WORKDIR /app
 
 ADD requirements.txt ./requirements.txt
 
-RUN apk --no-cache add musl-dev linux-headers gcc && pip install -r ./requiremnets.txt
+RUN apk --no-cache add musl-dev linux-headers gcc && pip install -r ./requirements.txt
 
-COPY . /webapp
+COPY src/ .
 
 EXPOSE 8050
 
-CMD [ "python", "./app.py" ]
+CMD [ "python", "main/app.py" ]

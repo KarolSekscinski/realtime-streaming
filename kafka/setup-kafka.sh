@@ -4,7 +4,7 @@ kafka-topics --bootstrap-server kafka-broker:29092 --list
 
 # Those lines creates kafka if it does not exist
 echo -e 'Creating Kafka topics'
-kafka-topics --bootstrap-server kafka-broker:29092 --create --if-not-exists --topic market --replication-factor 1 --partitions 1
+kafka-topics --bootstrap-server kafka-broker:29092 --create --if-not-exists --topic trades --replication-factor 1 --partitions 1
 
 # Those lines lists all topics on the kafka broker to confirm the creation of the market topic
 echo -e 'Successfully created topics:'

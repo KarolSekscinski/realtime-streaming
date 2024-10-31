@@ -1,0 +1,1241 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 2,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "hadesarchitect-cassandra-datasource",
+        "uid": "apachecassandra"
+      },
+      "description": "Info about price of BTC/USD",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "text",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 3,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "price_btc"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "price"
+              },
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-orange",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "filterable",
+                "value": true
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 3
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "volume_btc"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "volume"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 2
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "shades"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "interval": "1000ms",
+      "maxDataPoints": 2000,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "price_btc",
+          "columnTime": "trade_ts",
+          "columnValue": "volume",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "keyspace": "market",
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "A",
+          "table": "trades",
+          "target": "SELECT price, ingestion_ts FROM market.trades WHERE symbol = 'BINANCE:BTCUSDT'"
+        },
+        {
+          "alias": "volume_btc",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "hide": false,
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "B",
+          "target": "SELECT volume, ingestion_ts FROM market.trades WHERE symbol = 'BINANCE:BTCUSDT'"
+        }
+      ],
+      "title": "BTC/USD",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "hadesarchitect-cassandra-datasource",
+        "uid": "apachecassandra"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "price_x_volume"
+            },
+            "properties": [
+              {
+                "id": "custom.pointSize",
+                "value": 3
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "price_x_volume"
+              },
+              {
+                "id": "custom.axisColorMode",
+                "value": "text"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-orange",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "filterable",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "price_x_volume",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "A",
+          "target": "SELECT avg_price_x_volume, ingestion_ts FROM market.run_10_s_avg WHERE symbol = 'BINANCE:BTCUSDT'"
+        }
+      ],
+      "title": "AVG BTC/USD",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "hadesarchitect-cassandra-datasource",
+        "uid": "apachecassandra"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 3,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "price_eth"
+            },
+            "properties": [
+              {
+                "id": "custom.pointSize",
+                "value": 3
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-blue",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "filterable",
+                "value": true
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "price"
+              },
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "volume_eth"
+            },
+            "properties": [
+              {
+                "id": "custom.pointSize",
+                "value": 3
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "shades"
+                }
+              },
+              {
+                "id": "filterable"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "volume"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 1,
+      "maxDataPoints": 2000,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "alias": "price_eth",
+          "columnTime": "trade_ts",
+          "columnValue": "value",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "key": "Q-6ec27024-0e43-4c87-894f-5a7a02d12e50-0",
+          "keyspace": "market",
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "A",
+          "table": "trades",
+          "target": "SELECT price, ingestion_ts FROM market.trades WHERE symbol = 'BINANCE:ETHUSDT'"
+        },
+        {
+          "alias": "volume_eth",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "hide": false,
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "B",
+          "target": "SELECT volume, ingestion_ts FROM market.trades WHERE symbol = 'BINANCE:ETHUSDT'"
+        }
+      ],
+      "title": "ETH/USD",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "hadesarchitect-cassandra-datasource",
+        "uid": "apachecassandra"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "price_x_volume"
+            },
+            "properties": [
+              {
+                "id": "custom.pointSize",
+                "value": 3
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "price_x_volume"
+              },
+              {
+                "id": "filterable"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "price_x_volume",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "A",
+          "target": "SELECT avg_price_x_volume, ingestion_ts FROM market.run_10_s_avg WHERE symbol = 'BINANCE:ETHUSDT'"
+        }
+      ],
+      "title": "AVG ETH/USD",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "hadesarchitect-cassandra-datasource",
+        "uid": "apachecassandra"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 3,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "price_doge"
+            },
+            "properties": [
+              {
+                "id": "custom.pointSize",
+                "value": 3
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "price"
+              },
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-green",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "filterable",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "volume_doge"
+            },
+            "properties": [
+              {
+                "id": "custom.pointSize",
+                "value": 3
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "volume"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "shades"
+                }
+              },
+              {
+                "id": "filterable",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 7,
+      "interval": "1s",
+      "maxDataPoints": 2000,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "price_doge",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "A",
+          "target": "SELECT price, ingestion_ts FROM market.trades WHERE symbol = 'BINANCE:DOGEUSDT'"
+        },
+        {
+          "alias": "volume_doge",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "hide": false,
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "B",
+          "target": "SELECT volume, ingestion_ts FROM market.trades WHERE symbol = 'BINANCE:DOGEUSDT'"
+        }
+      ],
+      "title": "DOGE/USD",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "hadesarchitect-cassandra-datasource",
+        "uid": "apachecassandra"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 3,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "price_x_volume",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "A",
+          "target": "SELECT avg_price_x_volume, ingestion_ts FROM market.run_10_s_avg WHERE symbol = 'BINANCE:DOGEUSDT'"
+        }
+      ],
+      "title": "AVG DOGE/USD",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "hadesarchitect-cassandra-datasource",
+        "uid": "apachecassandra"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 3,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "price_xrp"
+            },
+            "properties": [
+              {
+                "id": "custom.pointSize",
+                "value": 4
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "left"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "price"
+              },
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-purple",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "filterable"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "volume_xrp"
+            },
+            "properties": [
+              {
+                "id": "custom.pointSize",
+                "value": 4
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "volume"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "shades"
+                }
+              },
+              {
+                "id": "filterable"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 5,
+      "interval": "1",
+      "maxDataPoints": 2000,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "price_xrp",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "A",
+          "target": "SELECT price, ingestion_ts FROM market.trades WHERE symbol = 'BINANCE:XRPUSDT'"
+        },
+        {
+          "alias": "volume_xrp",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "hide": false,
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "B",
+          "target": "SELECT volume, ingestion_ts FROM market.trades WHERE symbol = 'BINANCE:XRPUSDT'"
+        }
+      ],
+      "title": "XRP/USD",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "hadesarchitect-cassandra-datasource",
+        "uid": "apachecassandra"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "price_x_volume"
+            },
+            "properties": [
+              {
+                "id": "custom.pointSize",
+                "value": 4
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "auto"
+              },
+              {
+                "id": "custom.axisLabel",
+                "value": "price_x_volume"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "purple",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "filterable"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "alias": "price_x_volume",
+          "datasource": {
+            "type": "hadesarchitect-cassandra-datasource",
+            "uid": "apachecassandra"
+          },
+          "datasourceId": 2,
+          "queryType": "query",
+          "rawQuery": true,
+          "refId": "A",
+          "target": "SELECT avg_price_x_volume, ingestion_ts FROM market.run_10_s_avg WHERE symbol = 'BINANCE:XRPUSDT'"
+        }
+      ],
+      "title": "AVG XRP/USD",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "btc",
+  "uid": "de84c539-53b5-4879-9189-c02b9041a292",
+  "version": 12,
+  "weekStart": ""
+}

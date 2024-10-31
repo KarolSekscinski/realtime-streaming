@@ -1,5 +1,4 @@
-name: realtime-processing
-
+version: '3.8'
 
 
 services:
@@ -102,7 +101,6 @@ services:
     build:
       context: ProcessorSpark
       dockerfile: Dockerfile
-      no_cache: true
     ports:
       - "8002:8002"
       - "4040:4040"
@@ -114,8 +112,11 @@ services:
       - spark-worker-2
       - cassandra-db
       - cassandra-db-init
+#    volumes:
+#      - ./ProcessorSpark/src/main/resources/schemas:/app/resources/schemas
     networks:
       - pipeline
+
 
   spark-master:
     container_name: spark-master
@@ -210,9 +211,31 @@ services:
 #    ports:
 #      - "8050:8050"
 #    depends_on:
-#      - cassandra-db
+#      cassandra-db:
+#        condition: service_healthy
+#      main-processor:
+#        condition: service_started
 #    networks:
 #      - pipeline
+  grafana:
+    build:
+      context: ./grafana
+      dockerfile: Dockerfile
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - cassandra-db
+      - main-processor
+    environment:
+      - GF_INSTALL_PLUGINS=hadesarchitect-cassandra-datasource
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/dashboard.json
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+#      - GF_SECURITY_ADMIN_USER=admin
+#      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - pipeline
 
 networks:
   pipeline:
